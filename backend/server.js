@@ -1,0 +1,366 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config({ path: '../.env' });
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const User = require('./models/User');
+const TradeRecord = require('./models/TradeRecord');
+const MatchHistory = require('./models/MatchHistory');
+const OutreachMessage = require('./models/OutreachMessage');
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+app.use(cors());
+app.use(express.json());
+
+// Request logger
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
+
+// Initialize Gemini
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+
+// API: Register User
+app.post('/api/register', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ username, password: hashedPassword });
+    await user.save();
+    const token = jwt.sign({ userId: user._id }, 'supersecret', { expiresIn: '1h' });
+    res.json({ token, username });
+  } catch (err) {
+    res.status(400).json({ error: 'Username already exists or error' });
+  }
+});
+
+// API: Login User
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const user = await User.findOne({ username });
+    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
+
+    const token = jwt.sign({ userId: user._id }, 'supersecret', { expiresIn: '1h' });
+    res.json({ token, username, userId: user._id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Middleware: Authenticate Token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, 'supersecret', (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
+
+// API: Get initial data (commodities, countries)
+app.get('/api/metadata', async (req, res) => {
+  try {
+    const countries = await TradeRecord.distinct('country_or_area');
+    const commodities = await TradeRecord.distinct('commodity');
+    res.json({ countries, commodities });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Matchmaking using ML/Python script
+app.post('/api/match', authenticateToken, async (req, res) => {
+  const { country, commodity, flow } = req.body;
+  if (!country || !commodity || !flow) {
+    return res.status(400).json({ error: 'Missing required parameters' });
+  }
+
+  const targetFlow = flow === 'Export' ? 'Import' : 'Export';
+
+  try {
+    // Adaptive Learning: Get user's past likes
+    const pastLikes = await MatchHistory.find({ userId: req.user.userId, status: 'liked' });
+    const likedCountries = pastLikes.map(h => h.target_country);
+
+    const potentialPartners = await TradeRecord.aggregate([
+      { $match: { commodity: { $regex: new RegExp(commodity, 'i') }, flow: targetFlow, country_or_area: { $ne: country } } },
+      { $group: { _id: '$country_or_area', totalTradeUsd: { $sum: '$trade_usd' }, latestYear: { $max: '$year' } } },
+      { $sort: { totalTradeUsd: -1 } },
+      { $limit: 10 }
+    ]);
+
+    const recommendations = potentialPartners.map(p => {
+      // Adaptive Scoring
+      let adaptiveMultiplier = 1.0;
+      if (likedCountries.includes(p._id)) {
+        adaptiveMultiplier = 1.2; // 20% boost for countries they historically like
+      }
+
+      // Mocking intelligent breakdown based on volume
+      const volumeScore = Math.min(100, Math.round((p.totalTradeUsd / 1e9) * 100)) || 65;
+      const productMatch = Math.floor(Math.random() * 20) + 80; // 80-99%
+      const locationBias = Math.floor(Math.random() * 30) + 60; // 60-89%
+
+      return {
+        target_country: p._id,
+        commodity,
+        flow: targetFlow,
+        score: p.totalTradeUsd,
+        adaptiveScore: p.totalTradeUsd * adaptiveMultiplier,
+        metrics: {
+          productMatch: `${productMatch}%`,
+          locationBias: `${locationBias}%`,
+          volumeScore: `${volumeScore}/100`
+        }
+      };
+    });
+
+    // Sort by new adaptive score
+    recommendations.sort((a, b) => b.adaptiveScore - a.adaptiveScore);
+
+    res.json(recommendations);
+  } catch (error) {
+    console.error('Match error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Rank countries for a commodity (Need Help feature)
+app.post('/api/rank', async (req, res) => {
+  const { commodity, flow } = req.body;
+  if (!commodity || !flow) {
+    return res.status(400).json({ error: 'Missing required parameters' });
+  }
+
+  const targetFlow = flow === 'Export' ? 'Import' : 'Export';
+
+  try {
+    const topCountries = await TradeRecord.aggregate([
+      { $match: { commodity: commodity, flow: targetFlow } },
+      { $group: { _id: '$country_or_area', totalTradeUsd: { $sum: '$trade_usd' } } },
+      { $sort: { totalTradeUsd: -1 } },
+      { $limit: 5 }
+    ]);
+
+    const countryDataList = topCountries.map((c, i) => `${i+1}. ${c._id} ($${(c.totalTradeUsd / 1e6).toFixed(1)}M)`).join(', ');
+
+    const prompt = `Act as a quirky, genius global trade strategist. The user is from a specific country and wants to ${flow} "${commodity}". 
+    Based on our database, the top countries that ${targetFlow} this commodity are: ${countryDataList}.
+    Write a highly creative, engaging, and readable 3-sentence guide. Tell them EXACTLY who they should export/import to from this list, why it's a golden opportunity, and make it sound like an insider secret to help them easily decide!`;
+    
+    const result = await model.generateContent(prompt);
+    res.json({ ranking: result.response.text().trim(), topCountries });
+  } catch (error) {
+    console.error('Rank error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: On-demand AI Analysis for a specific Swipe Card
+app.post('/api/analyze-card', authenticateToken, async (req, res) => {
+  const { user_country, target_country, commodity, flow, score } = req.body;
+  if (!target_country || !commodity || !flow) {
+    return res.status(400).json({ error: 'Missing parameters' });
+  }
+
+  try {
+    const prompt = `You are an AI Trade Advisor. A user from ${user_country || 'a country'} wants to ${flow} "${commodity}". 
+    They are considering ${target_country}, which has a historical trade volume of $${score} for this. 
+    Explain why this is a good match using this EXACT format:
+    
+    👉 WHY this buyer is suggested:
+    - [Reason 1 relating to product demand]
+    - [Reason 2 relating to trade volume or location]`;
+    
+    const result = await model.generateContent(prompt);
+    res.json({ analysis: result.response.text().trim() });
+  } catch (error) {
+    res.status(500).json({ error: 'AI Quota exceeded or error' });
+  }
+});
+
+// API: Generate Outreach Email
+app.post('/api/generate-outreach', authenticateToken, async (req, res) => {
+  const { target_country, commodity, flow, score, tone } = req.body;
+  if (!target_country || !commodity || !flow) {
+    return res.status(400).json({ error: 'Missing parameters' });
+  }
+
+  try {
+    const toneInstruction = tone ? `Tone of the email should be ${tone}.` : 'Tone should be Formal.';
+    const prompt = `You are an expert B2B sales copywriter. The user is a supplier wanting to ${flow} "${commodity}" to buyers in ${target_country}. 
+    The historical trade volume for this is massive ($${score}). 
+    Write a short, highly-converting, professional cold outreach email to a potential buyer/distributor in ${target_country}. 
+    Include a compelling subject line. Do not use placeholders for the sender name, just use [Your Name]. ${toneInstruction}`;
+
+    const result = await model.generateContent(prompt);
+    res.json({ email: result.response.text().trim() });
+  } catch (error) {
+    res.status(500).json({ error: 'AI Quota exceeded or error' });
+  }
+});
+
+// API: Save Outreach Message
+app.post('/api/send-outreach', authenticateToken, async (req, res) => {
+  const { target_country, commodity, messageContent, tone } = req.body;
+  
+  if (!target_country || !commodity || !messageContent) {
+    return res.status(400).json({ error: 'Missing parameters' });
+  }
+
+  try {
+    const message = new OutreachMessage({
+      userId: req.user.userId,
+      target_country,
+      commodity,
+      messageContent,
+      tone
+    });
+
+    await message.save();
+    res.json({ success: true, message });
+  } catch (error) {
+    console.error('Save message error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Get Outreach Messages
+app.get('/api/outreach-messages', authenticateToken, async (req, res) => {
+  try {
+    const messages = await OutreachMessage.find({ userId: req.user.userId }).sort('createdAt');
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Record a Swipe and generate XAI
+app.post('/api/swipe', authenticateToken, async (req, res) => {
+  const { user_country, target_country, commodity, flow, score, status } = req.body;
+  
+  if (!user_country || !target_country || !commodity || !status) {
+    return res.status(400).json({ error: 'Missing required parameters' });
+  }
+
+  try {
+    // Generate XAI Reason using Gemini if the status is 'liked'
+    let xai_reason = "User did not show interest.";
+    
+    if (status === 'liked') {
+      const prompt = `You are an Explainable AI for a global trade matchmaking system. 
+      A user from ${user_country} who wants to ${flow} ${commodity} just matched with ${target_country}.
+      The historical trade volume for ${target_country} regarding this commodity is $${score}.
+      Write a 2-sentence explanation of why this is a strong match, sounding professional and data-driven.`;
+      
+      const result = await model.generateContent(prompt);
+      xai_reason = result.response.text().trim();
+    }
+
+    const match = new MatchHistory({
+      userId: req.user.userId,
+      user_country,
+      target_country,
+      commodity,
+      flow,
+      score,
+      xai_reason,
+      status
+    });
+
+    await match.save();
+    res.json(match);
+  } catch (error) {
+    console.error('Swipe error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Get Match History with XAI
+app.get('/api/history', authenticateToken, async (req, res) => {
+  try {
+    const history = await MatchHistory.find({ userId: req.user.userId, status: 'liked' }).sort('-createdAt');
+    res.json(history);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// API: Analyze User Portfolio
+app.get('/api/analyze-portfolio', authenticateToken, async (req, res) => {
+  try {
+    const history = await MatchHistory.find({ userId: req.user.userId, status: 'liked' });
+    if (history.length === 0) {
+      return res.json({ analysis: "You don't have any saved matches yet to analyze." });
+    }
+
+    const summary = history.map(h => `${h.flow} ${h.commodity} with ${h.target_country}`).join(', ');
+    const prompt = `You are an AI Portfolio Strategist. The user has agreed to the following trade deals: ${summary}.
+    Write a cohesive, 3-sentence executive summary of their overall global trade portfolio. What is their strategic focus, and are they well-diversified?`;
+
+    const result = await model.generateContent(prompt);
+    res.json({ analysis: result.response.text().trim() });
+  } catch (error) {
+    res.status(500).json({ error: 'AI Quota exceeded or error' });
+  }
+});
+
+// API: Detailed Stats for Dashboard
+app.get('/api/stats', authenticateToken, async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    
+    const [history, messages] = await Promise.all([
+      MatchHistory.find({ userId }),
+      OutreachMessage.find({ userId })
+    ]);
+
+    const rightSwipes = history.filter(h => h.status === 'liked').length;
+    const leftSwipes = history.filter(h => h.status === 'disliked').length;
+    const totalViewed = history.length;
+    
+    const regions = history.filter(h => h.status === 'liked').reduce((acc, h) => {
+      acc[h.target_country] = (acc[h.target_country] || 0) + 1;
+      return acc;
+    }, {});
+
+    const topRegions = Object.entries(regions)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5)
+      .map(([name, count]) => ({ name, count }));
+
+    res.json({
+      totalViewed,
+      rightSwipes,
+      leftSwipes,
+      ratio: totalViewed > 0 ? Math.round((rightSwipes / totalViewed) * 100) : 0,
+      outreachCount: messages.length,
+      topRegions
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
