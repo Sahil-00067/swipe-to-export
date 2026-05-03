@@ -98,7 +98,7 @@ app.get('/api/metadata', async (req, res) => {
   }
 });
 
-// API: Matchmaking using ML/Python script
+// API: Matchmaking using ML-inspired features from EDA
 app.post('/api/match', authenticateToken, async (req, res) => {
   const { country, commodity, flow } = req.body;
   if (!country || !commodity || !flow) {
@@ -108,47 +108,72 @@ app.post('/api/match', authenticateToken, async (req, res) => {
   const targetFlow = flow === 'Export' ? 'Import' : 'Export';
 
   try {
-    // Adaptive Learning: Get user's past likes
-    const pastLikes = await MatchHistory.find({ userId: req.user.userId, status: 'liked' });
-    const likedCountries = pastLikes.map(h => h.target_country);
+    // 1. Get all trade records for this commodity
+    const commodityRecords = await TradeRecord.find({ 
+      commodity: { $regex: new RegExp(commodity, 'i') },
+      country_or_area: { $ne: country }
+    });
 
-    const potentialPartners = await TradeRecord.aggregate([
-      { $match: { commodity: { $regex: new RegExp(commodity, 'i') }, flow: targetFlow, country_or_area: { $ne: country } } },
-      { $group: { _id: '$country_or_area', totalTradeUsd: { $sum: '$trade_usd' }, latestYear: { $max: '$year' } } },
-      { $sort: { totalTradeUsd: -1 } },
-      { $limit: 10 }
-    ]);
+    // 2. Group by country to calculate features (EDA inspired)
+    const countryStats = {};
+    commodityRecords.forEach(rec => {
+      if (!countryStats[rec.country_or_area]) {
+        countryStats[rec.country_or_area] = { imports: 0, exports: 0 };
+      }
+      if (rec.flow === 'Import') countryStats[rec.country_or_area].imports += rec.trade_usd;
+      if (rec.flow === 'Export') countryStats[rec.country_or_area].exports += rec.trade_usd;
+    });
 
-    const recommendations = potentialPartners.map(p => {
-      // Adaptive Scoring
-      let adaptiveMultiplier = 1.0;
-      if (likedCountries.includes(p._id)) {
-        adaptiveMultiplier = 1.2; // 20% boost for countries they historically like
+    // 3. Calculate Scores for potential partners
+    const recommendations = Object.entries(countryStats).map(([name, stats]) => {
+      const demandGap = stats.imports - stats.exports;
+      const importRatio = stats.imports / (stats.exports + 1);
+      const dependency = demandGap / (stats.imports + 1);
+      
+      // Calculate a combined compatibility score (0-100)
+      // Logic: Prefer countries with high demand (imports) and low competition (exports)
+      let compatibility = 0;
+      if (flow === 'Export') {
+        // We want buyers (High Imports, Low Exports)
+        compatibility = (importRatio > 1 ? 50 : 20) + (dependency > 0 ? 30 : 10) + (Math.min(20, (stats.imports / 1e7)));
+      } else {
+        // We want suppliers (High Exports, Low Imports)
+        const supplyGap = stats.exports - stats.imports;
+        compatibility = (stats.exports > stats.imports ? 50 : 20) + (Math.min(50, (stats.exports / 1e7)));
       }
 
-      // Mocking intelligent breakdown based on volume
-      const volumeScore = Math.min(100, Math.round((p.totalTradeUsd / 1e9) * 100)) || 65;
-      const productMatch = Math.floor(Math.random() * 20) + 80; // 80-99%
-      const locationBias = Math.floor(Math.random() * 30) + 60; // 60-89%
+      // Cap at 99%
+      const finalScore = Math.min(99, Math.max(60, Math.round(compatibility)));
 
       return {
-        target_country: p._id,
+        target_country: name,
         commodity,
         flow: targetFlow,
-        score: p.totalTradeUsd,
-        adaptiveScore: p.totalTradeUsd * adaptiveMultiplier,
+        score: stats.imports || stats.exports,
+        compatibility: finalScore,
         metrics: {
-          productMatch: `${productMatch}%`,
-          locationBias: `${locationBias}%`,
-          volumeScore: `${volumeScore}/100`
+          productMatch: `${finalScore}%`,
+          locationBias: `${Math.floor(Math.random() * 20) + 70}%`, // Mocked for now
+          volumeScore: `${Math.min(100, Math.round((stats.imports / 1e8) * 100))}/100`
         }
       };
     });
 
-    // Sort by new adaptive score
-    recommendations.sort((a, b) => b.adaptiveScore - a.adaptiveScore);
+    // 4. Adaptive Learning: Boost based on past likes
+    const pastLikes = await MatchHistory.find({ userId: req.user.userId, status: 'liked' });
+    const likedCountries = pastLikes.map(h => h.target_country);
 
-    res.json(recommendations);
+    recommendations.forEach(rec => {
+      if (likedCountries.includes(rec.target_country)) {
+        rec.compatibility = Math.min(99, rec.compatibility + 5);
+        rec.metrics.productMatch = `${rec.compatibility}%`;
+      }
+    });
+
+    // Sort by compatibility
+    recommendations.sort((a, b) => b.compatibility - a.compatibility);
+
+    res.json(recommendations.slice(0, 10));
   } catch (error) {
     console.error('Match error:', error);
     res.status(500).json({ error: error.message });
