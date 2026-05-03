@@ -68,9 +68,9 @@ export default function DecisionPanel({ lead, token, onClose, onSave }) {
 
   if (priorityScore >= 80) {
     priorityLabel = "High Priority";
-    priorityColor = "text-[#4A7C59]";
-    priorityBg = "bg-[#4A7C59]/10";
-    priorityRing = "text-[#4A7C59]";
+    priorityColor = "text-[var(--color-purple-500)]";
+    priorityBg = "bg-[var(--color-purple-500)]/10";
+    priorityRing = "text-[var(--color-purple-500)]";
     actionMessage = "Contact Immediately";
   } else if (priorityScore >= 50) {
     priorityLabel = "Medium Priority";
@@ -98,7 +98,7 @@ export default function DecisionPanel({ lead, token, onClose, onSave }) {
         animate={{ y: 0, scale: 1 }}
         exit={{ y: 20, scale: 0.95 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="w-full max-w-2xl bg-[#F5F1EB] rounded-[24px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="w-full max-w-2xl bg-[var(--color-cream)] rounded-[24px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Header Section */}
         <div className="bg-white p-6 pb-8 rounded-b-[32px] shadow-sm relative z-10 shrink-0">
@@ -157,15 +157,15 @@ export default function DecisionPanel({ lead, token, onClose, onSave }) {
             <h3 className="text-xl font-bold text-gray-900 mb-4">{actionMessage}</h3>
             <ul className="space-y-3">
               <li className="flex items-start gap-3 text-sm text-gray-600">
-                <CheckCircle2 size={18} className="text-[#4A7C59] shrink-0 mt-0.5" />
+                <CheckCircle2 size={18} className="text-[var(--color-green-400)] shrink-0 mt-0.5" />
                 <span>Consistent import activity in last 6 months indicating sustained demand.</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-gray-600">
-                <CheckCircle2 size={18} className="text-[#4A7C59] shrink-0 mt-0.5" />
+                <CheckCircle2 size={18} className="text-[var(--color-green-400)] shrink-0 mt-0.5" />
                 <span>Strong match with your product category ({lead.commodity}).</span>
               </li>
               <li className="flex items-start gap-3 text-sm text-gray-600">
-                <CheckCircle2 size={18} className="text-[#4A7C59] shrink-0 mt-0.5" />
+                <CheckCircle2 size={18} className="text-[var(--color-green-400)] shrink-0 mt-0.5" />
                 <span>High demand regional trends currently align with your export capacity.</span>
               </li>
             </ul>
@@ -181,7 +181,7 @@ export default function DecisionPanel({ lead, token, onClose, onSave }) {
                     key={tone}
                     onClick={() => generateEmail(tone)}
                     disabled={loadingEmail}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${emailTone === tone ? 'bg-[#8B5A2B] text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100 disabled:opacity-50'}`}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${emailTone === tone ? 'bg-[var(--color-gold)] text-white' : 'bg-gray-50 text-gray-600 hover:bg-gray-100 disabled:opacity-50'}`}
                   >
                     {tone}
                   </button>
@@ -221,7 +221,7 @@ export default function DecisionPanel({ lead, token, onClose, onSave }) {
             <div className="p-4 bg-white relative">
               {loadingEmail && (
                 <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-10 flex items-center justify-center">
-                  <Loader2 className="animate-spin text-[#8B5A2B]" size={24} />
+                  <Loader2 className="animate-spin text-[var(--color-gold)]" size={24} />
                 </div>
               )}
               <textarea 
@@ -243,7 +243,7 @@ export default function DecisionPanel({ lead, token, onClose, onSave }) {
           <button 
             onClick={handleSendOutreach}
             disabled={sending || !emailContent}
-            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#1A1A1A] text-white font-semibold hover:bg-black disabled:opacity-50 transition-colors shadow-md"
+            className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[var(--color-ink)] text-white font-semibold hover:bg-black disabled:opacity-50 transition-colors shadow-md"
           >
             {sending ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
             {sending ? 'Sending...' : 'Generate & Send Outreach'}

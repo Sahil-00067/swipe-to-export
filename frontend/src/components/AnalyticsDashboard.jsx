@@ -86,7 +86,7 @@ export default function AnalyticsDashboard({ token }) {
     return (
       <div className="w-full flex justify-center py-24">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin text-[#8B5A2B]">
+          <div className="animate-spin text-[var(--color-gold)]">
             <Activity size={48} />
           </div>
           <p className="text-gray-400 font-medium animate-pulse">Synchronizing trade data...</p>
@@ -110,14 +110,14 @@ export default function AnalyticsDashboard({ token }) {
       <div className="flex gap-8 mb-6 border-b border-gray-200 shrink-0">
         <button 
           onClick={() => setActiveTab('overview')}
-          className={`flex items-center gap-2 pb-4 px-2 border-b-2 font-bold transition-all ${activeTab === 'overview' ? 'border-[#8B5A2B] text-[#8B5A2B]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+          className={`flex items-center gap-2 pb-4 px-2 border-b-2 font-bold transition-all ${activeTab === 'overview' ? 'border-[var(--color-gold)] text-[var(--color-gold)]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
         >
           <BarChart3 size={20} />
           Overview
         </button>
         <button 
           onClick={() => setActiveTab('messages')}
-          className={`flex items-center gap-2 pb-4 px-2 border-b-2 font-bold transition-all ${activeTab === 'messages' ? 'border-[#8B5A2B] text-[#8B5A2B]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+          className={`flex items-center gap-2 pb-4 px-2 border-b-2 font-bold transition-all ${activeTab === 'messages' ? 'border-[var(--color-gold)] text-[var(--color-gold)]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
         >
           <MessageSquare size={20} />
           Messages Hub
@@ -137,10 +137,10 @@ export default function AnalyticsDashboard({ token }) {
             </div>
             
             <div className="bg-white p-6 rounded-3xl border border-gray-100 card-shadow">
-              <p className="text-xs font-bold text-[#4A7C59] uppercase tracking-widest mb-2">Accepted (Right)</p>
-              <h3 className="text-3xl font-black text-[#4A7C59]">{stats.rightSwipes}</h3>
+              <p className="text-xs font-bold text-[var(--color-purple-500)] uppercase tracking-widest mb-2">Accepted (Right)</p>
+              <h3 className="text-3xl font-black text-[var(--color-purple-500)]">{stats.rightSwipes}</h3>
               <div className="mt-2 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-                <div className="bg-[#4A7C59] h-full" style={{ width: `${stats.ratio}%` }}></div>
+                <div className="bg-[var(--color-purple-500)] h-full" style={{ width: `${stats.ratio}%` }}></div>
               </div>
             </div>
 
@@ -153,10 +153,10 @@ export default function AnalyticsDashboard({ token }) {
             </div>
 
             <div className="bg-white p-6 rounded-3xl border border-gray-100 card-shadow">
-              <p className="text-xs font-bold text-[#8B5A2B] uppercase tracking-widest mb-2">Outreach Sent</p>
-              <h3 className="text-3xl font-black text-[#8B5A2B]">{stats.outreachCount}</h3>
+              <p className="text-xs font-bold text-[var(--color-gold)] uppercase tracking-widest mb-2">Outreach Sent</p>
+              <h3 className="text-3xl font-black text-[var(--color-gold)]">{stats.outreachCount}</h3>
               <div className="mt-2 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-                <div className="bg-[#8B5A2B] h-full" style={{ width: stats.rightSwipes > 0 ? `${(stats.outreachCount / stats.rightSwipes) * 100}%` : '0%' }}></div>
+                <div className="bg-[var(--color-gold)] h-full" style={{ width: stats.rightSwipes > 0 ? `${(stats.outreachCount / stats.rightSwipes) * 100}%` : '0%' }}></div>
               </div>
             </div>
           </div>
@@ -171,14 +171,14 @@ export default function AnalyticsDashboard({ token }) {
                 <div className="relative w-32 h-32 flex items-center justify-center shrink-0">
                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                     <circle cx="18" cy="18" r="16" fill="transparent" stroke="#F1F5F9" strokeWidth="4"></circle>
-                    <circle cx="18" cy="18" r="16" fill="transparent" stroke="#4A7C59" strokeWidth="4" strokeDasharray={`${stats.ratio}, 100`}></circle>
+                    <circle cx="18" cy="18" r="16" fill="transparent" stroke="var(--color-purple-500)" strokeWidth="4" strokeDasharray={`${stats.ratio}, 100`}></circle>
                   </svg>
                   <span className="absolute text-2xl font-black text-gray-900">{stats.ratio}%</span>
                 </div>
                 <div className="space-y-4 flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full bg-[#4A7C59]"></div> Accepted
+                      <div className="w-3 h-3 rounded-full bg-[var(--color-purple-500)]"></div> Accepted
                     </span>
                     <span className="text-sm font-bold text-gray-900">{stats.rightSwipes}</span>
                   </div>
@@ -207,7 +207,7 @@ export default function AnalyticsDashboard({ token }) {
                         <span>{region.count} matches</span>
                       </div>
                       <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                        <div className="bg-[#8B5A2B] h-full" style={{ width: `${(region.count / stats.rightSwipes) * 100}%` }}></div>
+                        <div className="bg-[var(--color-gold)] h-full" style={{ width: `${(region.count / stats.rightSwipes) * 100}%` }}></div>
                       </div>
                     </div>
                   </div>
@@ -228,7 +228,7 @@ export default function AnalyticsDashboard({ token }) {
                 <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white transition-colors cursor-default group">
                   <div className="flex items-center gap-4">
                     <div className="p-2 bg-white rounded-xl shadow-sm group-hover:scale-110 transition-transform">
-                      <Mail size={18} className="text-[#8B5A2B]" />
+                      <Mail size={18} className="text-[var(--color-gold)]" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-gray-900">Email to {msg.target_country}</p>
@@ -237,7 +237,7 @@ export default function AnalyticsDashboard({ token }) {
                   </div>
                   <div className="text-right">
                     <p className="text-xs font-bold text-gray-400">{new Date(msg.createdAt).toLocaleDateString()}</p>
-                    <span className="text-[10px] font-bold text-[#4A7C59] uppercase tracking-widest">SENT</span>
+                    <span className="text-[10px] font-bold text-[var(--color-purple-500)] uppercase tracking-widest">SENT</span>
                   </div>
                 </div>
               ))}
@@ -259,7 +259,7 @@ export default function AnalyticsDashboard({ token }) {
                 <input 
                   type="text" 
                   placeholder="Search contacts..." 
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-100 border-none outline-none text-sm text-gray-700 focus:ring-2 focus:ring-[#8B5A2B]/20 transition-all"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-100 border-none outline-none text-sm text-gray-700 focus:ring-2 focus:ring-[var(--color-gold)]/20 transition-all"
                 />
               </div>
             </div>
@@ -306,7 +306,7 @@ export default function AnalyticsDashboard({ token }) {
 
           {/* Right Pane - Chat Window */}
           {selectedContact ? (
-            <div className="w-2/3 flex flex-col bg-[#F5F1EB]/30">
+            <div className="w-2/3 flex flex-col bg-[var(--color-cream)]/30">
               {/* Chat Header */}
               <div className="px-6 py-4 bg-white border-b border-gray-100 flex items-center gap-4 shrink-0 shadow-sm z-10">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center font-bold text-gray-600 shadow-sm border border-white">
@@ -326,7 +326,7 @@ export default function AnalyticsDashboard({ token }) {
               <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
                 {/* Initial Match System Message */}
                 <div className="flex justify-center">
-                  <div className="bg-[#4A7C59]/10 text-[#4A7C59] px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm border border-[#4A7C59]/20">
+                  <div className="bg-[var(--color-purple-500)]/10 text-[var(--color-purple-500)] px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm border border-[var(--color-purple-500)]/20">
                     <CheckCircle2 size={14} />
                     Matched for {selectedContact.commodity}
                   </div>
@@ -334,7 +334,7 @@ export default function AnalyticsDashboard({ token }) {
 
                 {messages.filter(m => m.target_country === selectedContact.target_country && m.commodity === selectedContact.commodity).map((msg, idx) => (
                   <div key={idx} className="flex justify-end">
-                    <div className="max-w-[75%] bg-[#1A1A1A] text-white rounded-2xl rounded-tr-sm p-4 shadow-md">
+                    <div className="max-w-[75%] bg-[var(--color-ink)] text-white rounded-2xl rounded-tr-sm p-4 shadow-md">
                       <p className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide flex justify-between">
                         <span>{msg.tone || 'Formal Outreach'}</span>
                         <span>{new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -348,7 +348,7 @@ export default function AnalyticsDashboard({ token }) {
 
               {/* Chat Input */}
               <div className="p-4 bg-white border-t border-gray-100 shrink-0">
-                <form onSubmit={handleSendMessage} className="flex items-end gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-200 focus-within:border-[#8B5A2B] focus-within:ring-1 focus-within:ring-[#8B5A2B] transition-all">
+                <form onSubmit={handleSendMessage} className="flex items-end gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-200 focus-within:border-[var(--color-gold)] focus-within:ring-1 focus-within:ring-[var(--color-gold)] transition-all">
                   <textarea 
                     value={newMessage}
                     onChange={e => setNewMessage(e.target.value)}
@@ -365,7 +365,7 @@ export default function AnalyticsDashboard({ token }) {
                   <button 
                     type="submit"
                     disabled={!newMessage.trim()}
-                    className="p-3 bg-[#1A1A1A] text-white rounded-xl hover:bg-black disabled:opacity-50 transition-all shrink-0 mb-0.5 mr-0.5 shadow-sm"
+                    className="p-3 bg-[var(--color-ink)] text-white rounded-xl hover:bg-black disabled:opacity-50 transition-all shrink-0 mb-0.5 mr-0.5 shadow-sm"
                   >
                     <Send size={18} />
                   </button>
@@ -374,7 +374,7 @@ export default function AnalyticsDashboard({ token }) {
               </div>
             </div>
           ) : (
-            <div className="w-2/3 flex flex-col items-center justify-center bg-[#F5F1EB]/30 text-gray-400 p-10 text-center">
+            <div className="w-2/3 flex flex-col items-center justify-center bg-[var(--color-cream)]/30 text-gray-400 p-10 text-center">
               <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm mb-4">
                 <MessageSquare size={32} className="text-gray-300" />
               </div>

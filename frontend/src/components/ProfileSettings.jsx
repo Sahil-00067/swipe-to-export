@@ -56,7 +56,7 @@ export default function ProfileSettings({ username, onLogout }) {
             </div>
             
             <div className="flex items-center gap-6 pb-6 border-b border-gray-100">
-              <div className="w-20 h-20 rounded-full bg-[#8B5A2B]/10 flex items-center justify-center text-[#8B5A2B] text-2xl font-bold">
+              <div className="w-20 h-20 rounded-full bg-[var(--color-gold)]/10 flex items-center justify-center text-[var(--color-gold)] text-2xl font-bold">
                 {username ? username.charAt(0).toUpperCase() : 'U'}
               </div>
               <div>
@@ -73,12 +73,12 @@ export default function ProfileSettings({ username, onLogout }) {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1.5">Email Address</label>
-                <input type="email" placeholder="email@example.com" className="w-full p-3 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 focus:border-[#8B5A2B] outline-none transition-all shadow-sm" />
+                <input type="email" placeholder="email@example.com" className="w-full p-3 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 focus:border-[var(--color-gold)] outline-none transition-all shadow-sm" />
               </div>
             </div>
             
             <div className="pt-4">
-              <button className="px-6 py-3 bg-[#1A1A1A] hover:bg-black text-white font-semibold rounded-xl shadow-md transition-all">
+              <button className="px-6 py-3 bg-[var(--color-ink)] hover:bg-black text-white font-semibold rounded-xl shadow-md transition-all">
                 Save Changes
               </button>
             </div>
@@ -95,18 +95,18 @@ export default function ProfileSettings({ username, onLogout }) {
             <div className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1.5">Company Name</label>
-                <input type="text" placeholder="Global Trade Corp" className="w-full p-3 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 focus:border-[#8B5A2B] outline-none transition-all shadow-sm" />
+                <input type="text" placeholder="Global Trade Corp" className="w-full p-3 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 focus:border-[var(--color-gold)] outline-none transition-all shadow-sm" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1.5">Website</label>
-                <input type="url" placeholder="https://www.example.com" className="w-full p-3 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 focus:border-[#8B5A2B] outline-none transition-all shadow-sm" />
+                <input type="url" placeholder="https://www.example.com" className="w-full p-3 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 focus:border-[var(--color-gold)] outline-none transition-all shadow-sm" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-600 mb-1.5">Brief Description (Used by AI)</label>
-                <textarea rows="4" placeholder="We are a premium exporter of agricultural goods..." className="w-full p-3 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 focus:border-[#8B5A2B] outline-none transition-all shadow-sm resize-none"></textarea>
+                <textarea rows="4" placeholder="We are a premium exporter of agricultural goods..." className="w-full p-3 rounded-xl bg-gray-50/50 border border-gray-200 text-gray-900 focus:border-[var(--color-gold)] outline-none transition-all shadow-sm resize-none"></textarea>
               </div>
               <div className="pt-4">
-                <button className="px-6 py-3 bg-[#1A1A1A] hover:bg-black text-white font-semibold rounded-xl shadow-md transition-all">
+                <button className="px-6 py-3 bg-[var(--color-ink)] hover:bg-black text-white font-semibold rounded-xl shadow-md transition-all">
                   Update Company Profile
                 </button>
               </div>

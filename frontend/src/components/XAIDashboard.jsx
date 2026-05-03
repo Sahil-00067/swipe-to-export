@@ -35,10 +35,10 @@ export default function XAIDashboard({ userCountry, token }) {
     <div className="w-full max-w-5xl mx-auto animate-fade-in pb-12 mt-4 space-y-10">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <BrainCircuit className="text-[#8B5A2B]" size={36} />
-          <h2 className="text-4xl font-black text-gray-900 tracking-tight">Portfolio AI Strategist</h2>
+          <BrainCircuit className="text-[var(--color-gold)]" size={36} />
+          <h2 className="text-4xl font-black text-[var(--color-ink)] tracking-tight font-playfair">Portfolio AI Strategist</h2>
         </div>
-        <div className="px-4 py-2 bg-[#8B5A2B]/10 rounded-full flex items-center gap-2 text-[#8B5A2B] text-sm font-bold">
+        <div className="px-4 py-2 bg-[var(--color-gold)]/10 rounded-full flex items-center gap-2 text-[var(--color-gold)] text-sm font-bold">
           <Database size={16} /> Data Mode: CSV + Neural Engine
         </div>
       </div>
@@ -51,8 +51,8 @@ export default function XAIDashboard({ userCountry, token }) {
               <Compass size={120} />
             </div>
             <div className="relative z-10">
-              <div className="flex items-center gap-2 text-[#8B5A2B] font-bold text-xs uppercase tracking-widest mb-6">
-                <Zap size={14} className="fill-[#8B5A2B]" /> Strategic Portfolio Review
+              <div className="flex items-center gap-2 text-[var(--color-gold)] font-bold text-xs uppercase tracking-widest mb-6">
+                <Zap size={14} className="fill-[var(--color-gold)]" /> Strategic Portfolio Review
               </div>
               {loading ? (
                 <div className="animate-pulse space-y-4">
@@ -77,20 +77,20 @@ export default function XAIDashboard({ userCountry, token }) {
           </div>
 
           <div className="bg-white p-8 rounded-[32px] border border-gray-100 card-shadow">
-            <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <Compass size={20} className="text-[#8B5A2B]"/> Actionable Strategy: How to Improve
+            <h3 className="text-xl font-bold text-[var(--color-ink)] font-playfair mb-6 flex items-center gap-2">
+              <Compass size={20} className="text-[var(--color-gold)]"/> Actionable Strategy: How to Improve
             </h3>
             <div className="space-y-4">
-              <div className="p-5 bg-[#8B5A2B]/5 rounded-2xl border border-[#8B5A2B]/10">
-                <h4 className="font-bold text-[#8B5A2B] text-sm mb-2 flex items-center gap-2">
+              <div className="p-5 bg-[var(--color-gold)]/5 rounded-2xl border border-[var(--color-gold)]/10">
+                <h4 className="font-bold text-[var(--color-gold)] text-sm mb-2 flex items-center gap-2">
                   <TrendingUp size={16} /> Market Diversification
                 </h4>
                 <p className="text-sm text-gray-700 leading-relaxed">
                   Your current portfolio is heavily weighted towards {history.length > 0 ? history[0].target_country : 'a single region'}. Consider swiping on more partners from South East Asia or Europe to hedge against regional market fluctuations.
                 </p>
               </div>
-              <div className="p-5 bg-[#4A7C59]/5 rounded-2xl border border-[#4A7C59]/10">
-                <h4 className="font-bold text-[#4A7C59] text-sm mb-2 flex items-center gap-2">
+              <div className="p-5 bg-[var(--color-purple-500)]/5 rounded-2xl border border-[var(--color-purple-500)]/10">
+                <h4 className="font-bold text-[var(--color-purple-500)] text-sm mb-2 flex items-center gap-2">
                   <Zap size={16} /> Outreach Optimization
                 </h4>
                 <p className="text-sm text-gray-700 leading-relaxed">
@@ -103,30 +103,30 @@ export default function XAIDashboard({ userCountry, token }) {
 
         {/* Right Column: Key Metrics */}
         <div className="space-y-8">
-          <div className="bg-[#1A1A1A] p-8 rounded-[32px] card-shadow text-white relative overflow-hidden group">
+          <div className="bg-[var(--color-ink)] p-8 rounded-[32px] card-shadow text-white relative overflow-hidden group">
             <div className="absolute -right-4 -bottom-4 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all"></div>
             <div className="relative z-10">
               <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-8">System Confidence</h4>
               <div className="flex items-end gap-3 mb-4">
                 <span className="text-7xl font-black tracking-tighter">94</span>
                 <span className="text-2xl font-bold text-gray-500 mb-3">%</span>
-                <TrendingUp className="text-green-400 mb-4" size={32} />
+                <TrendingUp className="text-[var(--color-green-400)] mb-4" size={32} />
               </div>
               <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden mb-6">
-                <div className="bg-green-400 h-full" style={{ width: '94%' }}></div>
+                <div className="bg-[var(--color-green-400)] h-full" style={{ width: '94%' }}></div>
               </div>
               <p className="text-gray-400 text-xs leading-relaxed">Neural matchmaking confidence score based on your swipe behavior and historical trade patterns.</p>
             </div>
           </div>
 
           <div className="bg-white p-8 rounded-[32px] border border-gray-100 card-shadow">
-             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6 flex items-center justify-between">
+             <h4 className="text-xs font-bold text-[var(--color-ink)]/60 uppercase tracking-widest mb-6 flex items-center justify-between">
               Active Strategy <span>{history.length} ITEMS</span>
             </h4>
             <div className="space-y-3">
               {history.slice(0, 4).map((h, i) => (
                 <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[10px] font-black text-[#8B5A2B] shadow-sm">
+                  <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-[10px] font-black text-[var(--color-gold)] shadow-sm">
                     {h.target_country.substring(0, 2).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">

@@ -68,16 +68,16 @@ export default function SwipeCard({ recommendation, onSwipe, token, userCountry 
       </motion.div>
       <motion.div 
         style={{ opacity: likeOpacity }} 
-        className="absolute top-12 left-8 z-20 border-4 border-[#4A7C59] text-[#4A7C59] text-4xl font-black uppercase tracking-widest px-3 py-1 rounded-xl -rotate-[15deg] pointer-events-none shadow-sm bg-white/50 backdrop-blur-sm"
+        className="absolute top-12 left-8 z-20 border-4 border-[var(--color-green-400)] text-[var(--color-green-400)] text-4xl font-black uppercase tracking-widest px-3 py-1 rounded-xl -rotate-[15deg] pointer-events-none shadow-sm bg-white/50 backdrop-blur-sm"
       >
         LIKE
       </motion.div>
 
-      <div className="h-40 bg-[#F5F1EB] flex items-center justify-center p-6 relative shrink-0 border-b border-gray-100 z-10">
-        <h2 className="text-4xl font-bold text-[#1A1A1A] text-center tracking-tight">
+      <div className="h-40 bg-[var(--color-cream)] flex items-center justify-center p-6 relative shrink-0 border-b border-gray-100 z-10">
+        <h2 className="text-4xl font-bold font-playfair text-[var(--color-ink)] text-center tracking-tight">
           {recommendation.target_country}
         </h2>
-        <div className="absolute top-4 right-4 bg-white px-3 py-1 rounded-full text-xs font-semibold text-[#8B5A2B] shadow-sm border border-[#8B5A2B]/10">
+        <div className="absolute top-4 right-4 bg-[var(--color-purple-500)]/5 px-3 py-1 rounded-full text-xs font-semibold text-[var(--color-purple-500)] shadow-sm border border-[var(--color-purple-500)]/20">
           {recommendation.score > 1000000 ? 'High Match' : 'Potential'}
         </div>
       </div>
@@ -92,9 +92,9 @@ export default function SwipeCard({ recommendation, onSwipe, token, userCountry 
               <p className="text-xs text-gray-500 mb-1 font-medium">Product Match</p>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-gray-200 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#4A7C59] h-full" style={{ width: recommendation.metrics?.productMatch || '90%' }}></div>
+                  <div className="bg-[var(--color-purple-500)] h-full" style={{ width: recommendation.metrics?.productMatch || '90%' }}></div>
                 </div>
-                <span className="text-sm font-bold text-[#4A7C59]">{recommendation.metrics?.productMatch || '90%'}</span>
+                <span className="text-sm font-bold text-[var(--color-purple-500)]">{recommendation.metrics?.productMatch || '90%'}</span>
               </div>
             </div>
 
@@ -102,9 +102,9 @@ export default function SwipeCard({ recommendation, onSwipe, token, userCountry 
               <p className="text-xs text-gray-500 mb-1 font-medium">Location Match</p>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-gray-200 h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-[#8B5A2B] h-full" style={{ width: recommendation.metrics?.locationBias || '75%' }}></div>
+                  <div className="bg-[var(--color-gold)] h-full" style={{ width: recommendation.metrics?.locationBias || '75%' }}></div>
                 </div>
-                <span className="text-sm font-bold text-[#8B5A2B]">{recommendation.metrics?.locationBias || '75%'}</span>
+                <span className="text-sm font-bold text-[var(--color-gold)]">{recommendation.metrics?.locationBias || '75%'}</span>
               </div>
             </div>
 
@@ -120,14 +120,14 @@ export default function SwipeCard({ recommendation, onSwipe, token, userCountry 
             <button 
               onClick={getAdvice}
               disabled={loadingAdvice}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#4A7C59]/5 text-[#4A7C59] font-medium hover:bg-[#4A7C59]/10 border border-[#4A7C59]/20 text-sm transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-purple-500)]/5 text-[var(--color-purple-500)] font-medium hover:bg-[var(--color-purple-500)]/10 border border-[var(--color-purple-500)]/20 text-sm transition-colors"
             >
               {loadingAdvice ? <Loader2 className="animate-spin" size={16} /> : <BrainCircuit size={16} />}
               {loadingAdvice ? 'Analyzing...' : 'Ask AI Strategist'}
             </button>
           ) : (
-            <div className="p-4 bg-[#4A7C59]/5 rounded-xl border border-[#4A7C59]/10 text-xs text-gray-700 leading-relaxed shadow-sm">
-              <p className="text-[#4A7C59] font-bold mb-1.5 uppercase flex items-center gap-1">
+            <div className="p-4 bg-[var(--color-purple-500)]/5 rounded-xl border border-[var(--color-purple-500)]/10 text-xs text-[var(--color-ink)]/80 leading-relaxed shadow-sm">
+              <p className="text-[var(--color-purple-500)] font-bold mb-1.5 uppercase flex items-center gap-1">
                 <BrainCircuit size={12} /> AI Strategist
               </p>
               {advice}
@@ -144,7 +144,7 @@ export default function SwipeCard({ recommendation, onSwipe, token, userCountry 
           </button>
           <button 
             onClick={() => onSwipe('right')}
-            className="w-14 h-14 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#4A7C59] hover:bg-[#4A7C59]/10 hover:border-[#4A7C59]/20 transition-all shadow-sm hover:scale-110"
+            className="w-14 h-14 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[var(--color-green-400)] hover:bg-[var(--color-green-400)]/10 hover:border-[var(--color-green-400)]/20 transition-all shadow-sm hover:scale-110"
           >
             <Heart size={28} />
           </button>

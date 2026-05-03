@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { RefreshCw, LayoutDashboard, Search, BrainCircuit } from 'lucide-react';
+import { RefreshCw, LayoutDashboard, Search, BrainCircuit, Home } from 'lucide-react';
 import LandingPage from './components/LandingPage';
 import SwipeCard from './components/SwipeCard';
 import XAIDashboard from './components/XAIDashboard';
@@ -109,32 +109,41 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
-      <nav className="w-full glass p-4 flex justify-between items-center sticky top-0 z-50 border-b border-gray-200/50">
-        <h1 className="text-2xl font-bold text-[#8B5A2B] flex items-center gap-2">
-          <RefreshCw className="text-[#8B5A2B]" /> Swipe-to-Export
-        </h1>
-        <div className="flex gap-4">
-          <button onClick={() => setView('setup')} className={`transition-colors ${view === 'setup' ? 'text-[#8B5A2B]' : 'text-gray-400 hover:text-[#8B5A2B]'}`} title="Find Partners">
-            <Search size={24} />
-          </button>
-          <button onClick={() => setView('dashboard')} className={`transition-colors ${view === 'dashboard' ? 'text-[#4A7C59]' : 'text-gray-400 hover:text-[#4A7C59]'}`} title="Portfolio">
-            <LayoutDashboard size={24} />
-          </button>
-          {user && (
-            <>
-              <button onClick={() => setView('analytics')} className={`transition-colors ${view === 'analytics' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-900'}`} title="Analytics">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-              </button>
-              <button onClick={() => setView('settings')} className={`transition-colors ${view === 'settings' ? 'text-gray-900' : 'text-gray-400 hover:text-gray-900'}`} title="Settings">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-              </button>
-            </>
-          )}
-        </div>
-      </nav>
+    <div className="min-h-screen flex flex-col items-center bg-[var(--color-cream)] text-[var(--color-ink)]">
+      {view !== 'landing' && (
+        <nav className="w-full glass p-4 flex justify-between items-center sticky top-0 z-50 border-b border-[var(--color-ink)]/10">
+          <h1 
+            className="text-2xl font-bold font-playfair text-[var(--color-ink)] flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => setView('landing')}
+            title="Go to Landing Page"
+          >
+            <RefreshCw className="text-[var(--color-purple-500)]" /> Swipe<span className="text-[var(--color-purple-500)]">to</span>Export
+          </h1>
+          <div className="flex gap-4">
+            <button onClick={() => setView('landing')} className="transition-colors text-[var(--color-ink)]/50 hover:text-[var(--color-ink)]" title="Home">
+              <Home size={24} />
+            </button>
+            <button onClick={() => setView('setup')} className={`transition-colors ${view === 'setup' ? 'text-[var(--color-purple-500)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-purple-500)]'}`} title="Find Partners">
+              <Search size={24} />
+            </button>
+            <button onClick={() => setView('dashboard')} className={`transition-colors ${view === 'dashboard' ? 'text-[var(--color-pink-400)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-pink-400)]'}`} title="Portfolio">
+              <LayoutDashboard size={24} />
+            </button>
+            {user && (
+              <>
+                <button onClick={() => setView('analytics')} className={`transition-colors ${view === 'analytics' ? 'text-[var(--color-gold)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-gold)]'}`} title="Analytics">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                </button>
+                <button onClick={() => setView('settings')} className={`transition-colors ${view === 'settings' ? 'text-[var(--color-green-400)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-green-400)]'}`} title="Settings">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
+              </>
+            )}
+          </div>
+        </nav>
+      )}
 
-      <main className="flex-1 w-full max-w-6xl p-6 flex flex-col items-center justify-center">
+      <main className={`flex-1 w-full flex flex-col items-center justify-center ${view === 'landing' ? '' : 'max-w-6xl p-6'}`}>
         {view === 'landing' && (
           <LandingPage onLogin={(userData) => { setUser(userData.username); setToken(userData.token); setView('setup'); }} />
         )}

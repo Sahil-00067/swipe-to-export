@@ -25,7 +25,7 @@ export default function SkipFeedback({ onDismiss }) {
         </div>
         <button 
           onClick={onDismiss}
-          className="text-xs font-bold text-[#8B5A2B] hover:underline"
+          className="text-xs font-bold text-[var(--color-gold)] hover:underline"
         >
           Next Partner →
         </button>
