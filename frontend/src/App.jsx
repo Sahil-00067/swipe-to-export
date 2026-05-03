@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { RefreshCw, LayoutDashboard, Search, BrainCircuit, Home } from 'lucide-react';
+import { RefreshCw, LayoutDashboard, Search, BrainCircuit, Home, MessageSquare } from 'lucide-react';
 import LandingPage from './components/LandingPage';
 import SwipeCard from './components/SwipeCard';
 import XAIDashboard from './components/XAIDashboard';
@@ -8,10 +8,12 @@ import AnalyticsDashboard from './components/AnalyticsDashboard';
 import ProfileSettings from './components/ProfileSettings';
 import DecisionPanel from './components/DecisionPanel';
 import SkipFeedback from './components/SkipFeedback';
+import AuthModal from './components/AuthModal';
+import OutreachDashboard from './components/OutreachDashboard';
 import { AnimatePresence } from 'framer-motion';
 
 function App() {
-  const [view, setView] = useState(() => localStorage.getItem('swipe_view') || 'landing'); // 'landing', 'setup', 'swipe', 'dashboard', 'analytics'
+  const [view, setView] = useState(() => localStorage.getItem('swipe_view') || 'landing'); // 'landing', 'setup', 'swipe', 'dashboard', 'analytics', 'messages'
   const [metadata, setMetadata] = useState({ countries: [], commodities: [] });
   const [formData, setFormData] = useState({ country: '', commodity: '', flow: 'Export' });
   const [recommendations, setRecommendations] = useState([]);
@@ -22,10 +24,11 @@ function App() {
   const [showCommodities, setShowCommodities] = useState(false);
   const [aiRanking, setAiRanking] = useState('');
   const [rankingLoading, setRankingLoading] = useState(false);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => localStorage.getItem('username') || null);
   const [token, setToken] = useState(() => localStorage.getItem('token') || null);
   const [selectedLead, setSelectedLead] = useState(null);
   const [showSkipFeedback, setShowSkipFeedback] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('swipe_view', view);
@@ -40,6 +43,14 @@ function App() {
   }, [token]);
 
   useEffect(() => {
+    if (user) {
+      localStorage.setItem('username', user);
+    } else {
+      localStorage.removeItem('username');
+    }
+  }, [user]);
+
+  useEffect(() => {
     axios.get('http://localhost:5001/api/metadata')
       .then(res => setMetadata(res.data))
       .catch(err => console.error(err));
@@ -49,6 +60,11 @@ function App() {
     if (!formData.country || !formData.commodity) return;
     setLoading(true);
     try {
+      // Save onboarding data to DB
+      await axios.post('http://localhost:5001/api/onboarding', formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
       const res = await axios.post('http://localhost:5001/api/match', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -119,18 +135,26 @@ function App() {
           >
             <RefreshCw className="text-[var(--color-purple-500)]" /> Swipe<span className="text-[var(--color-purple-500)]">to</span>Export
           </h1>
-          <div className="flex gap-4">
+          <div className="flex gap-4 items-center">
             <button onClick={() => setView('landing')} className="transition-colors text-[var(--color-ink)]/50 hover:text-[var(--color-ink)]" title="Home">
               <Home size={24} />
             </button>
             <button onClick={() => setView('setup')} className={`transition-colors ${view === 'setup' ? 'text-[var(--color-purple-500)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-purple-500)]'}`} title="Find Partners">
               <Search size={24} />
             </button>
+            {recommendations.length > 0 && (
+              <button onClick={() => setView('swipe')} className={`transition-colors ${view === 'swipe' ? 'text-[var(--color-purple-500)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-purple-500)]'}`} title="Active Matches">
+                <BrainCircuit size={24} />
+              </button>
+            )}
             <button onClick={() => setView('dashboard')} className={`transition-colors ${view === 'dashboard' ? 'text-[var(--color-pink-400)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-pink-400)]'}`} title="Portfolio">
               <LayoutDashboard size={24} />
             </button>
-            {user && (
+            {user ? (
               <>
+                <button onClick={() => setView('messages')} className={`transition-colors ${view === 'messages' ? 'text-[var(--color-purple-500)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-purple-500)]'}`} title="Message Hub">
+                  <MessageSquare size={24} />
+                </button>
                 <button onClick={() => setView('analytics')} className={`transition-colors ${view === 'analytics' ? 'text-[var(--color-gold)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-gold)]'}`} title="Analytics">
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
                 </button>
@@ -138,6 +162,13 @@ function App() {
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                 </button>
               </>
+            ) : (
+              <button 
+                onClick={() => setShowAuthModal(true)}
+                className="bg-[var(--color-purple-500)] text-white px-4 py-2 rounded-xl font-bold text-sm hover:opacity-90 transition-opacity"
+              >
+                Login
+              </button>
             )}
           </div>
         </nav>
@@ -145,7 +176,15 @@ function App() {
 
       <main className={`flex-1 w-full flex flex-col items-center justify-center ${view === 'landing' ? '' : 'max-w-6xl p-6'}`}>
         {view === 'landing' && (
-          <LandingPage onLogin={(userData) => { setUser(userData.username); setToken(userData.token); setView('setup'); }} />
+          <LandingPage 
+            onLogin={() => {
+              if (token) {
+                setView('setup');
+              } else {
+                setShowAuthModal(true);
+              }
+            }} 
+          />
         )}
 
         {view === 'setup' && (
@@ -330,8 +369,8 @@ function App() {
         )}
 
         {view === 'swipe' && (
-          <div className="w-full max-w-md h-[600px] flex items-center justify-center relative">
-            <div className="absolute inset-0 bg-[#E5DFD3]/40 rounded-[3rem] border border-[#E5DFD3] shadow-inner"></div>
+          <div className="w-full max-w-lg h-[650px] flex items-center justify-center relative p-12">
+            <div className="absolute inset-0 bg-[#F2EDE4] rounded-[4rem] border border-white/50 shadow-[inset_0_2px_10px_rgba(0,0,0,0.02)]"></div>
             {currentIndex < recommendations.length ? (
               <SwipeCard 
                 key={currentIndex}
@@ -387,6 +426,10 @@ function App() {
           <AnalyticsDashboard token={token} />
         )}
 
+        {view === 'messages' && (
+          <OutreachDashboard token={token} />
+        )}
+
         {view === 'settings' && (
           <ProfileSettings 
             username={user} 
@@ -400,12 +443,34 @@ function App() {
               lead={selectedLead} 
               token={token}
               onClose={() => setSelectedLead(null)} 
+              onSent={() => {
+                setSelectedLead(null);
+                setView('messages');
+              }}
               onSave={() => {
                 setSelectedLead(null);
               }} 
             />
           )}
         </AnimatePresence>
+
+        <AuthModal 
+          isOpen={showAuthModal} 
+          onClose={() => setShowAuthModal(false)}
+          onAuthSuccess={(data) => {
+            setToken(data.token);
+            setUser(data.username);
+            // Pre-fill form if user has data
+            if (data.country || data.commodity || data.flow) {
+              setFormData({
+                country: data.country || '',
+                commodity: data.commodity || '',
+                flow: data.flow || 'Export'
+              });
+            }
+            setView('setup');
+          }}
+        />
       </main>
     </div>
   );

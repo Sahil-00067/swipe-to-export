@@ -6,9 +6,8 @@ import ProductCard from './ui/ProductCard';
 import ScoringBar from './ui/ScoringBar';
 
 const LandingPage = ({ onLogin }) => {
-  // Mock login for landing page
   const handleStart = () => {
-    onLogin({ username: 'Demo User', token: 'demo-token-123' });
+    onLogin();
   };
 
   return (

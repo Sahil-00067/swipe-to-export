@@ -135,18 +135,18 @@ export default function SwipeCard({ recommendation, onSwipe, token, userCountry 
           )}
         </div>
 
-        <div className="flex justify-center gap-6 pt-4 pb-2 mt-auto">
+        <div className="flex justify-center gap-8 pt-6 pb-2 mt-auto">
           <button 
             onClick={() => onSwipe('left')}
-            className="w-14 h-14 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-100 transition-all shadow-sm hover:scale-110"
+            className="w-16 h-16 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 hover:border-red-200 transition-all shadow-sm hover:scale-110 active:scale-95"
           >
-            <X size={28} />
+            <X size={32} strokeWidth={2.5} />
           </button>
           <button 
             onClick={() => onSwipe('right')}
-            className="w-14 h-14 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[var(--color-green-400)] hover:bg-[var(--color-green-400)]/10 hover:border-[var(--color-green-400)]/20 transition-all shadow-sm hover:scale-110"
+            className="w-16 h-16 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-300 hover:text-[var(--color-green-400)] hover:bg-[var(--color-green-400)]/10 hover:border-[var(--color-green-400)]/20 transition-all shadow-sm hover:scale-110 active:scale-95"
           >
-            <Heart size={28} />
+            <Heart size={32} strokeWidth={2.5} fill="currentColor" className="fill-transparent hover:fill-[var(--color-green-400)]" />
           </button>
         </div>
       </div>

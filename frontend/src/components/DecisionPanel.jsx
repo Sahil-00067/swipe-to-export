@@ -6,33 +6,49 @@ import {
   Send, Copy, Edit2, X, Bookmark, ExternalLink, Mail, Zap, Loader2 
 } from 'lucide-react';
 
-export default function DecisionPanel({ lead, token, onClose, onSave }) {
-  const [emailTone, setEmailTone] = useState('Formal');
+export default function DecisionPanel({ lead, token, onClose, onSave, onSent }) {
+  const priorityScore = lead.metrics?.productMatch ? parseInt(lead.metrics.productMatch) : 85;
+  const initialTone = priorityScore >= 90 ? 'Formal' : priorityScore >= 70 ? 'Friendly' : 'Direct';
+  
+  const [emailTone, setEmailTone] = useState(initialTone);
   const [copied, setCopied] = useState(false);
   const [emailContent, setEmailContent] = useState('');
   const [loadingEmail, setLoadingEmail] = useState(false);
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    generateEmail('Formal');
+    generateEmail(initialTone);
   }, []);
+
+  const getFallbackEmail = (tone, lead) => {
+    const subject = `Trade Opportunity: ${lead.commodity} in ${lead.target_country}`;
+    const greeting = tone === 'Formal' ? 'Dear Procurement Team,' : tone === 'Friendly' ? 'Hi there,' : 'Hello,';
+    const body = tone === 'Formal' 
+      ? `We are writing to express our interest in establishing a long-term trade partnership for ${lead.commodity}. Our data shows significant potential for growth in the ${lead.target_country} market.`
+      : tone === 'Friendly'
+      ? `We noticed the amazing work you're doing in ${lead.target_country}! We'd love to chat about how our ${lead.commodity} could help you reach even more customers.`
+      : `We are ready to ship ${lead.commodity} to ${lead.target_country}. We see high trade volumes here and want to discuss a deal.`;
+    
+    return `Subject: ${subject}\n\n${greeting}\n\n${body}\n\nBest regards,\n[Your Name] | Swipe-to-Export`;
+  };
 
   const generateEmail = async (tone) => {
     setLoadingEmail(true);
-    setEmailTone(tone);
+    const currentTone = tone || initialTone;
+    setEmailTone(currentTone);
     try {
       const res = await axios.post('http://localhost:5001/api/generate-outreach', {
         target_country: lead.target_country,
         commodity: lead.commodity,
         flow: lead.flow,
         score: lead.score,
-        tone: tone
+        tone: currentTone
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setEmailContent(res.data.email);
     } catch (err) {
-      setEmailContent("Error generating email. Please try again.");
+      setEmailContent(getFallbackEmail(currentTone, lead));
     }
     setLoadingEmail(false);
   };
@@ -48,7 +64,7 @@ export default function DecisionPanel({ lead, token, onClose, onSave }) {
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      onClose();
+      onSent();
     } catch (err) {
       console.error(err);
       alert('Failed to send outreach.');
@@ -57,7 +73,6 @@ export default function DecisionPanel({ lead, token, onClose, onSave }) {
   };
 
   // Mock derived data based on lead
-  const priorityScore = lead.metrics?.productMatch ? parseInt(lead.metrics.productMatch) : 85;
   const companyName = `Apex Imports ${lead.target_country}`;
   
   let priorityLabel = "Low Priority Lead";
@@ -210,10 +225,18 @@ export default function DecisionPanel({ lead, token, onClose, onSave }) {
                 AI Drafted Email
               </p>
               <div className="flex items-center gap-2">
-                <button onClick={handleCopy} className="p-1.5 rounded-md hover:bg-white text-gray-500 transition-colors shadow-sm border border-transparent hover:border-gray-200" title="Copy">
+                <button 
+                  onClick={handleCopy} 
+                  className="p-1.5 rounded-md hover:bg-white text-gray-500 transition-colors shadow-sm border border-transparent hover:border-gray-200" 
+                  title="Copy to Clipboard"
+                >
                   {copied ? <CheckCircle2 size={16} className="text-green-500" /> : <Copy size={16} />}
                 </button>
-                <button className="p-1.5 rounded-md hover:bg-white text-gray-500 transition-colors shadow-sm border border-transparent hover:border-gray-200" title="Edit">
+                <button 
+                  onClick={() => document.getElementById('email-draft').focus()}
+                  className="p-1.5 rounded-md hover:bg-white text-gray-500 transition-colors shadow-sm border border-transparent hover:border-gray-200" 
+                  title="Edit Draft"
+                >
                   <Edit2 size={16} />
                 </button>
               </div>
@@ -221,14 +244,18 @@ export default function DecisionPanel({ lead, token, onClose, onSave }) {
             <div className="p-4 bg-white relative">
               {loadingEmail && (
                 <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-10 flex items-center justify-center">
-                  <Loader2 className="animate-spin text-[var(--color-gold)]" size={24} />
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="animate-spin text-[var(--color-purple-500)]" size={24} />
+                    <span className="text-[10px] font-bold text-gray-400 uppercase">Generating with AI...</span>
+                  </div>
                 </div>
               )}
               <textarea 
+                id="email-draft"
                 value={emailContent}
                 onChange={(e) => setEmailContent(e.target.value)}
-                className="w-full h-40 text-sm text-gray-600 resize-none outline-none leading-relaxed bg-transparent"
-                placeholder="Drafting email..."
+                className="w-full h-48 text-sm text-gray-700 resize-none outline-none leading-relaxed bg-transparent font-medium"
+                placeholder="Your AI-drafted outreach will appear here..."
               />
             </div>
           </div>

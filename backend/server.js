@@ -30,7 +30,20 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+// Middleware: Authenticate Token
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, 'supersecret', (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+};
 
 // API: Register User
 app.post('/api/register', async (req, res) => {
@@ -57,24 +70,22 @@ app.post('/api/login', async (req, res) => {
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign({ userId: user._id }, 'supersecret', { expiresIn: '1h' });
-    res.json({ token, username, userId: user._id });
+    res.json({ token, username, userId: user._id, country: user.country, commodity: user.commodity, flow: user.flow });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Middleware: Authenticate Token
-const authenticateToken = (req, res, next) => {
-  const authHeader = req.headers['authorization'];
-  const token = authHeader && authHeader.split(' ')[1];
-  if (!token) return res.sendStatus(401);
-
-  jwt.verify(token, 'supersecret', (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
-    next();
-  });
-};
+// API: Update Onboarding Data
+app.post('/api/onboarding', authenticateToken, async (req, res) => {
+  const { country, commodity, flow } = req.body;
+  try {
+    const user = await User.findByIdAndUpdate(req.user.userId, { country, commodity, flow }, { new: true });
+    res.json({ success: true, user });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // API: Get initial data (commodities, countries)
 app.get('/api/metadata', async (req, res) => {
@@ -207,10 +218,22 @@ app.post('/api/generate-outreach', authenticateToken, async (req, res) => {
 
   try {
     const toneInstruction = tone ? `Tone of the email should be ${tone}.` : 'Tone should be Formal.';
-    const prompt = `You are an expert B2B sales copywriter. The user is a supplier wanting to ${flow} "${commodity}" to buyers in ${target_country}. 
-    The historical trade volume for this is massive ($${score}). 
-    Write a short, highly-converting, professional cold outreach email to a potential buyer/distributor in ${target_country}. 
-    Include a compelling subject line. Do not use placeholders for the sender name, just use [Your Name]. ${toneInstruction}`;
+    const prompt = `You are a high-level B2B trade negotiator. A user wants to ${flow} the commodity "${commodity}" to a prime partner in ${target_country}.
+    The trade potential is estimated at $${score.toLocaleString()}.
+    
+    Task: Write a high-converting, personalized outreach email.
+    
+    Tone Requirements: ${tone || 'Formal'}
+    - If Formal: Use professional, respectful language, emphasizing reliability and long-term partnership.
+    - If Friendly: Use a warm, approachable tone, focusing on mutual growth and a shared passion for the industry.
+    - If Direct: Be concise, data-driven, and focus on the immediate ROI and trade volumes.
+    
+    Email Structure:
+    1. A punchy, relevant subject line mentioning "${commodity}" and "${target_country}".
+    2. A greeting.
+    3. A hook mentioning the specific trade opportunity for ${commodity}.
+    4. A clear call to action.
+    5. Signature as "[Your Name] | Swipe-to-Export AI Assisted Outreach".`;
 
     const result = await model.generateContent(prompt);
     res.json({ email: result.response.text().trim() });
