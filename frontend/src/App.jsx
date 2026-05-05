@@ -30,9 +30,6 @@ function App() {
   const [showSkipFeedback, setShowSkipFeedback] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Production API Base URL
-  const API_BASE_URL = 'https://swipe-to-export.onrender.com/api';
-
   useEffect(() => {
     localStorage.setItem('swipe_view', view);
   }, [view]);
@@ -54,8 +51,8 @@ function App() {
   }, [user]);
 
   useEffect(() => {
-    // Corrected to /metadata endpoint
-    axios.get(`${API_BASE_URL}/metadata`) 
+    // Corrected URL for metadata fetch
+    axios.get('https://swipe-to-export.onrender.com/api/metadata') 
       .then(res => setMetadata(res.data))
       .catch(err => console.error(err));
   }, []);
@@ -64,8 +61,8 @@ function App() {
     if (!formData.country || !formData.commodity) return;
     setLoading(true);
     try {
-      // Corrected to /matchmaking endpoint
-      const res = await axios.post(`${API_BASE_URL}/matchmaking`, formData, {
+      // Corrected URL for matchmaking
+      const res = await axios.post('https://swipe-to-export.onrender.com/api/matchmaking', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRecommendations(res.data);
@@ -93,8 +90,8 @@ function App() {
     }
     
     try {
-      // Corrected to /swipe endpoint
-      await axios.post(`${API_BASE_URL}/swipe`, {
+      // Corrected URL for swipe logging
+      await axios.post('https://swipe-to-export.onrender.com/api/swipe', {
         user_country: formData.country,
         target_country: currentRec.target_country,
         commodity: formData.commodity,
@@ -113,8 +110,8 @@ function App() {
     if (!formData.commodity) return;
     setRankingLoading(true);
     try {
-      // Corrected to /ai-help endpoint
-      const res = await axios.post(`${API_BASE_URL}/ai-help`, {
+      // Corrected URL for AI help
+      const res = await axios.post('https://swipe-to-export.onrender.com/api/ai-help', {
         commodity: formData.commodity,
         flow: formData.flow
       });
