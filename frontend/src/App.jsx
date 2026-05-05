@@ -188,16 +188,13 @@ function App() {
         <AuthModal 
           isOpen={showAuthModal} 
           onClose={() => setShowAuthModal(false)}
-          onAuthSuccess={(data) => {
-            setToken(data.token);
-            
-            // CRITICAL FIX: Ensure user is a string (username) and not the full object
-            // This prevents the React Error #31 crash
-            const safeUsername = typeof data.username === 'object' ? data.username.username : data.username;
-            setUser(safeUsername);
-            
-            setView('setup');
-          }}
+         onAuthSuccess={(data) => {
+  setToken(data.token);
+  // This ensures 'user' is a string, which React can render.
+  const nameOnly = typeof data.username === 'object' ? data.username.username : data.username;
+  setUser(nameOnly);
+  setView('setup');
+}}
         />
       </main>
     </div>
