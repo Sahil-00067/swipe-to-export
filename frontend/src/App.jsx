@@ -30,7 +30,7 @@ function App() {
   const [showSkipFeedback, setShowSkipFeedback] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Dynamic API Base URL detection
+  // Dynamically determines if we hit localhost or the live Vercel backend
   const API_BASE = window.location.hostname === 'localhost' 
     ? 'http://localhost:5001' 
     : `https://${window.location.hostname}`;
@@ -55,7 +55,7 @@ function App() {
     }
   }, [user]);
 
-  // FIXED: Environment-aware metadata fetch
+  // Environment-aware metadata fetch to prevent 404s
   useEffect(() => {
     axios.get(`${API_BASE}/api/metadata`)
       .then(res => setMetadata(res.data))
@@ -122,7 +122,7 @@ function App() {
       setAiRanking(res.data.ranking);
     } catch (err) {
       console.error(err);
-      setAiRanking("Error fetching AI ranking. The AI quota might be exceeded.");
+      setAiRanking("Error fetching AI ranking.");
     }
     setRankingLoading(false);
   };
@@ -145,7 +145,7 @@ function App() {
               <>
                 <button onClick={() => setView('messages')} className={`${view === 'messages' ? 'text-[var(--color-purple-500)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-purple-500)]'}`}><MessageSquare size={24} /></button>
                 <button onClick={() => setView('analytics')} className={`${view === 'analytics' ? 'text-[var(--color-gold)]' : 'text-[var(--color-ink)]/50 hover:text-[var(--color-gold)]'}`}>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                   <LayoutDashboard size={24} />
                 </button>
               </>
             )}
@@ -156,28 +156,23 @@ function App() {
 
       <main className={`flex-1 w-full flex flex-col items-center justify-center ${view === 'landing' ? '' : 'max-w-6xl p-6'}`}>
         {view === 'landing' && <LandingPage onLogin={() => token ? setView('setup') : setShowAuthModal(true)} />}
+        
         {view === 'setup' && (
           <div className="glass p-8 rounded-3xl w-full max-w-md card-shadow">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {onboardingStep === 1 && 'Where are you based?'}
-                {onboardingStep === 2 && 'What do you trade?'}
-                {onboardingStep === 3 && 'Your Objectives'}
-              </h2>
+              <h2 className="text-2xl font-bold text-gray-900">Step {onboardingStep} of 3</h2>
             </div>
-            
             {onboardingStep === 1 && (
               <div>
                 <input 
                   className="w-full p-4 rounded-xl bg-gray-50/50 border border-gray-200"
                   value={formData.country}
-                  onFocus={() => setShowCountries(true)}
                   onChange={e => setFormData({...formData, country: e.target.value})}
                 />
                 <button onClick={() => setOnboardingStep(2)} disabled={!formData.country} className="w-full mt-4 py-4 rounded-xl bg-[#1A1A1A] text-white">Continue</button>
               </div>
             )}
-            {/* Step 2 and 3 omitted for brevity, ensure they use similar environment-aware patterns */}
+            {/* ... other steps ... */}
           </div>
         )}
 
@@ -195,7 +190,12 @@ function App() {
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={(data) => {
             setToken(data.token);
-            setUser(data.username);
+            
+            // CRITICAL FIX: Ensure user is a string (username) and not the full object
+            // This prevents the React Error #31 crash
+            const safeUsername = typeof data.username === 'object' ? data.username.username : data.username;
+            setUser(safeUsername);
+            
             setView('setup');
           }}
         />
