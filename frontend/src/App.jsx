@@ -477,5 +477,3 @@ function App() {
 }
 
 export default App;
-
-THIS IS APP.JSX
