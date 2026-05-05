@@ -61,11 +61,11 @@ function App() {
     setLoading(true);
     try {
       // Save onboarding data to DB
-      await axios.post('http://localhost:5001/api/onboarding', formData, {
+      await axios.post('https://swipe-to-export.onrender.com', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      const res = await axios.post('http://localhost:5001/api/match', formData, {
+      const res = await axios.post('https://swipe-to-export.onrender.com', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setRecommendations(res.data);
@@ -93,7 +93,7 @@ function App() {
     }
     
     try {
-      await axios.post('http://localhost:5001/api/swipe', {
+      await axios.post('https://swipe-to-export.onrender.com', {
         user_country: formData.country,
         target_country: currentRec.target_country,
         commodity: formData.commodity,
@@ -112,7 +112,7 @@ function App() {
     if (!formData.commodity) return;
     setRankingLoading(true);
     try {
-      const res = await axios.post('http://localhost:5001/api/rank', {
+      const res = await axios.post('https://swipe-to-export.onrender.com', {
         commodity: formData.commodity,
         flow: formData.flow
       });
