@@ -139,6 +139,3 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
 };
 
 export default AuthModal;
-
-this is full code
-give me full code to replace
