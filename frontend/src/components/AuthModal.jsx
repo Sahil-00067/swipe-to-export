@@ -14,13 +14,24 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }) => {
     setLoading(true);
     setError('');
     
+    // Dynamically determine the API base URL
+    const API_BASE_URL = window.location.hostname === 'localhost' 
+      ? 'http://localhost:5001' 
+      : `https://${window.location.hostname}`;
+
     const endpoint = isLogin ? 'login' : 'register';
+    
     try {
-      const res = await axios.post(`http://localhost:5001/api/${endpoint}`, formData);
+      // Points to the dynamic URL instead of hardcoded localhost
+      const res = await axios.post(`${API_BASE_URL}/api/${endpoint}`, formData);
       onAuthSuccess(res.data);
       onClose();
     } catch (err) {
-      setError(err.response?.data?.error || 'Authentication failed. Please try again.');
+      // Improved error messaging for network vs database issues
+      const msg = err.code === 'ERR_NETWORK'
+        ? 'Connection Refused: Backend not reached.'
+        : err.response?.data?.error || 'Authentication failed. Please try again.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
