@@ -23,6 +23,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// --- ADD THIS BLOCK START ---
+app.get('/', (req, res) => {
+  res.send('Swipe-to-Export API is Running and Live!');
+});
+// --- ADD THIS BLOCK END ---
+
+// Your other routes (like app.use('/api', ...)) follow below...
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
