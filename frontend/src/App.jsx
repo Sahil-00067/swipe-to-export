@@ -51,10 +51,10 @@ function App() {
   }, [user]);
 
   useEffect(() => {
-    axios.get('http://localhost:5001/api/metadata')
-      .then(res => setMetadata(res.data))
-      .catch(err => console.error(err));
-  }, []);
+  axios.get('https://swipe-to-export.onrender.com/api/metadata') // Updated URL
+    .then(res => setMetadata(res.data))
+    .catch(err => console.error(err));
+}, []);
 
   const startMatchmaking = async () => {
     if (!formData.country || !formData.commodity) return;
